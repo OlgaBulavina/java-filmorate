@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final LocalDate CINEMATOGRAPHY_BIRTHDAY_DATE = LocalDate.of(1895, 12, 28);
+    private final LocalDate cinematographyBirthdayDate = LocalDate.of(1895, 12, 28);
     private Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
@@ -33,7 +33,7 @@ public class FilmController {
             log.error("provided description is too long");
             throw new ValidationException("Description length is more than 200 symbols");
         }
-        if (newFilm.getReleaseDate().isBefore(CINEMATOGRAPHY_BIRTHDAY_DATE)) {
+        if (newFilm.getReleaseDate().isBefore(cinematographyBirthdayDate)) {
             log.error("provided wrong release date");
             throw new ValidationException("Wrong release date");
         }
@@ -68,7 +68,7 @@ public class FilmController {
                 log.error("provided description is too long");
                 throw new ValidationException("Description length is more than 200 symbols");
             }
-            if (updatedFilm.getReleaseDate().isBefore(CINEMATOGRAPHY_BIRTHDAY_DATE)) {
+            if (updatedFilm.getReleaseDate().isBefore(cinematographyBirthdayDate)) {
                 log.error("provided wrong release date");
                 throw new ValidationException("Wrong release date");
             }
