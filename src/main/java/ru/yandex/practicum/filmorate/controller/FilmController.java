@@ -14,8 +14,7 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-   // private final static Logger log = LoggerFactory.getLogger(FilmController.class);
-    private final LocalDate CinematographyBD = LocalDate.of(1895, 12, 28);
+    private final LocalDate CINEMATOGRAPHY_BIRTHDAY_DATE = LocalDate.of(1895, 12, 28);
     private Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
@@ -34,7 +33,7 @@ public class FilmController {
             log.error("provided description is too long");
             throw new ValidationException("Description length is more than 200 symbols");
         }
-        if (newFilm.getReleaseDate().isBefore(CinematographyBD)) {
+        if (newFilm.getReleaseDate().isBefore(CINEMATOGRAPHY_BIRTHDAY_DATE)) {
             log.error("provided wrong release date");
             throw new ValidationException("Wrong release date");
         }
@@ -46,7 +45,7 @@ public class FilmController {
         newFilm.setId(getNextId());
 
         films.put(newFilm.getId(), newFilm);
-        log.info("added new film: " + newFilm);
+        log.info("added new film: {}", newFilm);
 
         return newFilm;
     }
@@ -69,7 +68,7 @@ public class FilmController {
                 log.error("provided description is too long");
                 throw new ValidationException("Description length is more than 200 symbols");
             }
-            if (updatedFilm.getReleaseDate().isBefore(CinematographyBD)) {
+            if (updatedFilm.getReleaseDate().isBefore(CINEMATOGRAPHY_BIRTHDAY_DATE)) {
                 log.error("provided wrong release date");
                 throw new ValidationException("Wrong release date");
             }
@@ -84,7 +83,7 @@ public class FilmController {
             oldFilm.setDescription(updatedFilm.getDescription());
             oldFilm.setDuration(updatedFilm.getDuration());
             oldFilm.setReleaseDate(updatedFilm.getReleaseDate());
-            log.info("updated film: " + oldFilm);
+            log.info("updated film: {}", oldFilm);
 
             return oldFilm;
 
@@ -106,6 +105,7 @@ public class FilmController {
     private boolean descriptionLengthValidation(Film film) {
         return film.getDescription().length() <= 200;
     }
+
     private boolean nameValidation(Film film) {
         return film.getName() != null && !film.getName().isBlank();
     }

@@ -15,7 +15,6 @@ import java.util.Map;
 @Slf4j
 public class UserController {
     private Map<Long, User> users = new HashMap<>();
-   // private final static Logger log = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping
     public Collection get() {
@@ -39,9 +38,10 @@ public class UserController {
         }
 
         newUser.setId(getNextId());
-        newUser.setName(newUser.getName() == null || newUser.getName().isEmpty() ? newUser.getLogin() : newUser.getName());
+        newUser.setName(newUser.getName() == null || newUser.getName().isEmpty() ? newUser.getLogin() :
+                newUser.getName());
         users.put(newUser.getId(), newUser);
-        log.info("added new user: " + newUser);
+        log.info("added new user: {}", newUser);
 
         return newUser;
     }
@@ -68,11 +68,12 @@ public class UserController {
             }
 
             User oldUser = users.get(updatedUser.getId());
-            oldUser.setName(updatedUser.getName() == null || updatedUser.getName().isEmpty() ? updatedUser.getLogin() : updatedUser.getName());
+            oldUser.setName(updatedUser.getName() == null || updatedUser.getName().isEmpty()
+                    || updatedUser.getName().isBlank() ? updatedUser.getLogin() : updatedUser.getName());
             oldUser.setEmail(updatedUser.getEmail());
             oldUser.setLogin(updatedUser.getLogin());
             oldUser.setBirthday(updatedUser.getBirthday());
-            log.info("added new user: " + oldUser);
+            log.info("updated user: {}", oldUser);
 
             return oldUser;
 
