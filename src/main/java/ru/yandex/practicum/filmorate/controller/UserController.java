@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -38,8 +39,7 @@ public class UserController {
         }
 
         newUser.setId(getNextId());
-        newUser.setName(newUser.getName() == null || newUser.getName().isEmpty() ? newUser.getLogin() :
-                newUser.getName());
+        newUser.setName(StringUtils.hasText(newUser.getName()) ? newUser.getName() : newUser.getLogin());
         users.put(newUser.getId(), newUser);
         log.info("added new user: {}", newUser);
 
@@ -48,7 +48,7 @@ public class UserController {
 
     @PutMapping
     public User update(@RequestBody User updatedUser) {
-        if (updatedUser.getId() == null || updatedUser.getId().toString().isBlank()) {
+        if (updatedUser.getId() == null) {
             log.error("provided wrong ID");
             throw new ValidationException("Id should be indicated");
         }
@@ -92,11 +92,11 @@ public class UserController {
     }
 
     private boolean emailValidation(User user) {
-        return user.getEmail() != null && user.getEmail().contains("@") && !user.getEmail().isBlank();
+        return StringUtils.hasText(user.getEmail()) && user.getEmail().contains("@");
     }
 
     private boolean loginValidation(User user) {
-        return user.getLogin() != null && !user.getLogin().isBlank() && !user.getLogin().contains(" ");
+        return StringUtils.hasText(user.getLogin()) && !user.getLogin().contains(" ");
     }
 
     private boolean birthdayValidation(User user) {

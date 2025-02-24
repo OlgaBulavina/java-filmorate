@@ -5,9 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class FilmorateApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(FilmorateApplication.class, args);
-	}
-/*	final Gson gson = new Gson();*/
+    public static void main(String[] args) {
+        SpringApplication.run(FilmorateApplication.class, args);
+    }
 
 }

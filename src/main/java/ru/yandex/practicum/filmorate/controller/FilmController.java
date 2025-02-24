@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -25,11 +26,11 @@ public class FilmController {
 
     @PostMapping
     public Film add(@RequestBody Film newFilm) {
-        if (!nameValidation(newFilm)) {
+        if (!validateName(newFilm)) {
             log.error("provided wrong film name");
             throw new ValidationException("Film should have a name");
         }
-        if (!descriptionLengthValidation(newFilm)) {
+        if (!validateDescriptionLength(newFilm)) {
             log.error("provided description is too long");
             throw new ValidationException("Description length is more than 200 symbols");
         }
@@ -53,18 +54,18 @@ public class FilmController {
     @PutMapping
     public Film update(@RequestBody Film updatedFilm) {
 
-        if (updatedFilm.getId() == null || updatedFilm.getId().toString().isBlank()) {
+        if (updatedFilm.getId() == null) {
             log.error("provided wrong ID");
             throw new ValidationException("Id should be indicated");
         }
 
         if (films.containsKey(updatedFilm.getId())) {
 
-            if (!nameValidation(updatedFilm)) {
+            if (!validateName(updatedFilm)) {
                 log.error("provided wrong film name");
                 throw new ValidationException("Film should have a name");
             }
-            if (!descriptionLengthValidation(updatedFilm)) {
+            if (!validateDescriptionLength(updatedFilm)) {
                 log.error("provided description is too long");
                 throw new ValidationException("Description length is more than 200 symbols");
             }
@@ -102,11 +103,11 @@ public class FilmController {
         return ++currentMaxId;
     }
 
-    private boolean descriptionLengthValidation(Film film) {
+    private boolean validateDescriptionLength(Film film) {
         return film.getDescription().length() <= 200;
     }
 
-    private boolean nameValidation(Film film) {
-        return film.getName() != null && !film.getName().isBlank();
+    private boolean validateName(Film film) {
+        return StringUtils.hasText(film.getName());
     }
 }
