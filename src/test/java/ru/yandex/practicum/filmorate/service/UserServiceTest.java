@@ -39,6 +39,7 @@ public class UserServiceTest {
         assertEquals(userOne.getFriends().stream().findFirst().get(), userTwo.getId());
         assertEquals(userTwo.getFriends().stream().findFirst().get(), userOne.getId());
     }
+
     @Test
     void mutualFriends() {
         User userOne = new User();
