@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}") //new
-    public User getUser(@PathVariable long id) {
+    public User getUser(@PathVariable Long id) {
         return userService.returnUserById(id);
     }
 
@@ -37,22 +37,23 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        System.out.println("-- запрошено добавление друзей " + id + " & " + friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Long> showFriendsIds(@PathVariable long id) {
-        return userService.returnUserById(id).getFriends();
+    public Collection<User> showFriends(@PathVariable Long id) {
+        return userService.returnFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<Long> showMutualFriends(@PathVariable long id, @PathVariable long otherId) {
+    public Collection<User> showMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.mutualFriendsSet(id, otherId);
     }
 }

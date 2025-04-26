@@ -7,15 +7,15 @@ import java.util.Collection;
 public interface UserStorage {
 
 
-    User addUser(long userId, User user);
+    User addUser(Long userId, User user);
 
-    User updateUser(long userId, User updatedUser);
+    User updateUser(Long userId, User updatedUser);
 
-    void deleteUser(long userId);
+    void deleteUser(Long userId);
 
     Collection<User> returnUsers();
 
     Collection<Long> returnIDs();
 
-    User returnUserById(long userId);
+    User returnUserById(Long userId);
 }

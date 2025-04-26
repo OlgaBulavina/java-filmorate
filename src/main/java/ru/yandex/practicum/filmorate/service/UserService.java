@@ -12,7 +12,9 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -61,13 +63,28 @@ public class UserService {
         }
     }
 
+    public Collection<User> returnFriends(Long userId) {
+        if (userStorage.returnIDs().contains(userId)) {
+            User currentUser = userStorage.returnUserById(userId);
+            return currentUser.getFriends().stream()
+                    .map(id -> userStorage.returnUserById(id))
+                    .collect(Collectors.toSet());
+        } else {
+            log.error("provided wrong ID");
+            throw new NotFoundException("Indicated wrong id");
+        }
+    }
+
     public void addFriend(Long userId, Long newFriendId) {
         if (userStorage.returnIDs().contains(userId) && userStorage.returnIDs().contains(newFriendId)) {
             User currentUser = userStorage.returnUserById(userId);
             User newFriendUser = userStorage.returnUserById(newFriendId);
             currentUser.getFriends().add(newFriendId);
+            System.out.println("-- после добавления НД друзья пользователя " + userId + ": " + currentUser.getFriends());
             newFriendUser.getFriends().add(userId);
+            System.out.println("-- после добавления НД друзья НД " + newFriendId + ": " + newFriendUser.getFriends());
             log.info("added friends: {}, {}", userId, newFriendId);
+
         } else {
             log.error("provided wrong IDs");
             throw new NotFoundException("Indicated wrong users' id numbers");
@@ -97,16 +114,19 @@ public class UserService {
         }
     }
 
-    public Set<Long> mutualFriendsSet(Long userId, Long otherUserId) {
+    public Collection<User> mutualFriendsSet(Long userId, Long otherUserId) {
         if (userStorage.returnIDs().contains(userId) && userStorage.returnIDs().contains(otherUserId)) {
             User currentUser = userStorage.returnUserById(userId);
-            User friendUser = userStorage.returnUserById(otherUserId);
-            Set<Long> userFriends = currentUser.getFriends();
-            Set<Long> otherFriends = friendUser.getFriends();
+            User otherUser = userStorage.returnUserById(otherUserId);
+            Set<Long> userFriends = new HashSet<>(currentUser.getFriends());
+            Set<Long> otherFriends = otherUser.getFriends();
 
             userFriends.retainAll(otherFriends);
-
-            return userFriends;
+            log.info("provided information about mutual friends for users with IDs {} and {}: {}",
+                    userId, otherUserId, userFriends);
+            return userFriends.stream()
+                    .map(id -> userStorage.returnUserById(id))
+                    .collect(Collectors.toSet());
         } else {
             log.error("provided wrong IDs");
             throw new NotFoundException("Indicated wrong users' id numbers");

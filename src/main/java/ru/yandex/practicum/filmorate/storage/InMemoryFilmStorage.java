@@ -12,13 +12,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
-    public Film addFilm(long filmId, Film newFilm) {
+    public Film addFilm(Long filmId, Film newFilm) {
         films.put(newFilm.getId(), newFilm);
         return newFilm;
     }
 
     @Override
-    public Film updateFilm(long filmId, Film updatedFilm) {
+    public Film updateFilm(Long filmId, Film updatedFilm) {
 
         Film oldFilm = films.get(updatedFilm.getId());
 
@@ -30,7 +30,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(long filmId) {
+    public void deleteFilm(Long filmId) {
         films.remove(filmId);
     }
 
@@ -45,7 +45,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film returnFilmById(long filmId) {
+    public Film returnFilmById(Long filmId) {
         return films.get(filmId);
     }
 }

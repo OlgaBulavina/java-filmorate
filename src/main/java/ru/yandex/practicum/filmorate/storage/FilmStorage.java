@@ -7,16 +7,16 @@ import java.util.Collection;
 public interface FilmStorage {
 
 
-    Film addFilm(long filmId, Film newFilm);
+    Film addFilm(Long filmId, Film newFilm);
 
-    Film updateFilm(long filmId, Film updatedFilm);
+    Film updateFilm(Long filmId, Film updatedFilm);
 
-    void deleteFilm(long filmId);
+    void deleteFilm(Long filmId);
 
     Collection<Film> returnFilms();
 
     Collection<Long> returnIDs();
 
-    Film returnFilmById(long filmId);
+    Film returnFilmById(Long filmId);
 
 }

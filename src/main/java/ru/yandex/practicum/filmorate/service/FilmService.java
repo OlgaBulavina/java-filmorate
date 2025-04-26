@@ -115,7 +115,7 @@ public class FilmService {
                 .limit((defaultAmountOfFilms >= filmStorage.returnFilms().size() ?
                         defaultAmountOfFilms : filmStorage.returnFilms().size()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-
+        log.info("provided information about requested top films {}", filmsSortedByAmountOfLikes);
         return filmsSortedByAmountOfLikes;
     }
 

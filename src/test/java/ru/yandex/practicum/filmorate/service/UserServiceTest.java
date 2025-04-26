@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,9 +77,23 @@ public class UserServiceTest {
         userService.addFriend(userOne.getId(), userFour.getId());
         userService.addFriend(userThree.getId(), userFour.getId());
 
-        Set<Long> mutualFriends = userService.mutualFriendsSet(userOne.getId(), userThree.getId());
+        Collection<User> mutualFriends = userService.mutualFriendsSet(userOne.getId(), userThree.getId());
 
-        assertEquals(mutualFriends, Set.of(userTwo.getId(), userFour.getId()));
+        assertEquals(mutualFriends, Set.of(userTwo, userFour));
+
+        User userFive = new User();
+        userFive.setName("name5");
+        userFive.setLogin("login5");
+        userFive.setBirthday(LocalDate.of(1985, 5, 11));
+        userFive.setEmail("email5@yandex.ru");
+        userService.addUser(userFive);
+
+        assertEquals(userService.mutualFriendsSet(userOne.getId(), userFive.getId()).size(), 0);
+
+        userService.addFriend(userThree.getId(), userFive.getId());
+
+        assertEquals(userService.mutualFriendsSet(userOne.getId(), userFive.getId()).size(), 0);
+        assertEquals(userService.mutualFriendsSet(userTwo.getId(), userFive.getId()).size(), 1);
     }
 
 }

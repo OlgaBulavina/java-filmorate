@@ -12,13 +12,13 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public User addUser(long userId, User user) {
+    public User addUser(Long userId, User user) {
         users.put(userId, user);
         return user;
     }
 
     @Override
-    public User updateUser(long userId, User updatedUser) {
+    public User updateUser(Long userId, User updatedUser) {
         User oldUser = users.get(updatedUser.getId());
         oldUser.setName(updatedUser.getName() == null || updatedUser.getName().isEmpty()
                 || updatedUser.getName().isBlank() ? updatedUser.getLogin() : updatedUser.getName());
@@ -30,7 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(long userId) {
+    public void deleteUser(Long userId) {
         users.remove(userId);
     }
 
@@ -45,7 +45,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User returnUserById(long userId) {
+    public User returnUserById(Long userId) {
         return users.get(userId);
     }
 }

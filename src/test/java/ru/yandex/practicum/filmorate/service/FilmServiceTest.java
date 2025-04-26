@@ -79,9 +79,6 @@ public class FilmServiceTest {
         Set<Film> filmRating = filmService.getPopular(Optional.of("100"));
         Set<Film> filmRating2 = filmService.getPopular(Optional.of(""));
 
-        System.out.println(filmRating);
-        System.out.println(filmRating2);
-
         TreeSet<Film> mostPopularFilms = new TreeSet<>(new FilmComparator());
         mostPopularFilms.add(filmOne);
         mostPopularFilms.add(filmTwo);
