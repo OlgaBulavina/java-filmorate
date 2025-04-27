@@ -13,10 +13,8 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -38,24 +36,23 @@ public class FilmService {
             log.error("provided wrong film ID");
             throw new NotFoundException("Film Id should be indicated");
         }
-        if (filmStorage.returnIDs().contains(updatedFilm.getId())) {
-
-            validateAllParameters(updatedFilm);
-            log.info("updated film: {}", updatedFilm);
-
-            return filmStorage.updateFilm(updatedFilm.getId(), updatedFilm);
-        } else {
+        if (!filmStorage.idExists(updatedFilm.getId())) {
             log.error("provided wrong film ID");
             throw new NotFoundException("Indicated wrong film id");
+        } else {
+            validateAllParameters(updatedFilm);
+            log.info("updated film: {}", updatedFilm);
+            return filmStorage.updateFilm(updatedFilm.getId(), updatedFilm);
         }
     }
 
     public Film getFilm(long id) {
-        if (filmStorage.returnIDs().contains(id)) {
-            return filmStorage.returnFilmById(id);
-        } else {
+        Optional<Film> requestedFilmOptional = Optional.of(filmStorage.returnFilmById(id));
+        if (!requestedFilmOptional.isPresent()) {
             log.error("provided wrong film ID");
             throw new NotFoundException("Indicated wrong film id");
+        } else {
+            return requestedFilmOptional.get();
         }
     }
 
@@ -67,40 +64,34 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long likedUserId) {
-        if (filmStorage.returnIDs().contains(filmId)) {
-            if (userStorage.returnIDs().contains(likedUserId)) {
-                Film currentFilm = filmStorage.returnFilmById(filmId);
-                Set<Long> currentFilmLikes = currentFilm.getLikes();
-                currentFilmLikes.add(likedUserId);
-                log.info("To film with id {} added like from user with id: {}", filmId, likedUserId);
-            } else {
-                log.error("provided wrong user ID");
-                throw new NotFoundException("Indicated wrong user id number");
-            }
-        } else {
+        if (!filmStorage.idExists(filmId)) {
             log.error("provided wrong film ID");
             throw new NotFoundException("Indicated wrong film id number");
+        } else {
+            if (!userStorage.idExists(likedUserId)) {
+                log.error("provided wrong user ID");
+                throw new NotFoundException("Indicated wrong user id number");
+            } else {
+                Film currentFilm = filmStorage.returnFilmById(filmId);
+                currentFilm.getLikes().add(likedUserId);
+                log.info("To film with id {} added like from user with id: {}", filmId, likedUserId);
+            }
         }
     }
 
     public void deleteLike(Long filmId, Long dislikedUserId) {
-
-        if (filmStorage.returnIDs().contains(filmId)) {
-            if (userStorage.returnIDs().contains(dislikedUserId)) {
-                Film currentFilm = filmStorage.returnFilms()
-                        .stream()
-                        .filter(film -> film.getId() == filmId)
-                        .findFirst()
-                        .get();
-                currentFilm.getLikes().remove(dislikedUserId);
-                log.info("To film with id {} deleted like from user with id: {}", filmId, dislikedUserId);
-            } else {
-                log.error("provided wrong user ID");
-                throw new NotFoundException("Indicated wrong user id number");
-            }
-        } else {
+        if (!filmStorage.idExists(filmId)) {
             log.error("provided wrong film ID");
             throw new NotFoundException("Indicated wrong film id number");
+        } else {
+            if (!userStorage.idExists(dislikedUserId)) {
+                log.error("provided wrong user ID");
+                throw new NotFoundException("Indicated wrong user id number");
+            } else {
+                Film currentFilm = filmStorage.returnFilmById(filmId);
+                currentFilm.getLikes().remove(dislikedUserId);
+                log.info("To film with id {} deleted like from user with id: {}", filmId, dislikedUserId);
+            }
         }
     }
 
@@ -109,20 +100,15 @@ public class FilmService {
         if (count.isPresent() && !count.get().isEmpty()) {
             defaultAmountOfFilms = Long.parseLong(count.get());
         }
-
-        LinkedHashSet<Film> filmsSortedByAmountOfLikes = filmStorage.returnFilms().stream()
-                .sorted(new FilmComparator())
-                .limit((defaultAmountOfFilms >= filmStorage.returnFilms().size() ?
-                        defaultAmountOfFilms : filmStorage.returnFilms().size()))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        log.info("provided information about requested top films {}", filmsSortedByAmountOfLikes);
-        return filmsSortedByAmountOfLikes;
+        Set<Film> topLikedFilms = filmStorage.returnTopLikedFilms(defaultAmountOfFilms);
+        log.info("provided information about requested top films {}", topLikedFilms);
+        return topLikedFilms;
     }
 
     private long getNextId() {
-        long currentMaxId = filmStorage.returnIDs()
+        long currentMaxId = filmStorage.returnFilms()
                 .stream()
-                .mapToLong(id -> id)
+                .mapToLong(film -> film.getId())
                 .max()
                 .orElse(0);
         return ++currentMaxId;

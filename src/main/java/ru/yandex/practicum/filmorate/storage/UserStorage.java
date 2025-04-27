@@ -15,7 +15,11 @@ public interface UserStorage {
 
     Collection<User> returnUsers();
 
-    Collection<Long> returnIDs();
+    boolean idExists(Long id);
 
     User returnUserById(Long userId);
+
+    Collection<User> returnFriends(Long id);
+
+    Collection<User> mutualFriends(Long id, Long otherId);
 }

@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmComparator;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -40,12 +40,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Long> returnIDs() {
-        return films.keySet();
+    public boolean idExists(Long id) {
+        return films.keySet().contains(id);
     }
 
     @Override
     public Film returnFilmById(Long filmId) {
         return films.get(filmId);
+    }
+
+    public Set<Film> returnTopLikedFilms(Long amount) {
+        LinkedHashSet<Film> filmsSortedByAmountOfLikes = returnFilms().stream()
+                .sorted(new FilmComparator())
+                .limit((amount >= returnFilms().size() ? amount : returnFilms().size()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return filmsSortedByAmountOfLikes;
     }
 }
