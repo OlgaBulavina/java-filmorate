@@ -2,7 +2,7 @@
 Template repository for Filmorate project.
 ## ER-Diagram
 
-
+![Схема базы данных проекта Filmorate](/ER_diagram.jpg)
 
 ## Пояснение к схеме БД:
 
