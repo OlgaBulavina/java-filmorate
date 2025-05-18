@@ -1,113 +1,55 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private final LocalDate cinematographyBirthdayDate = LocalDate.of(1895, 12, 28);
-    private Map<Long, Film> films = new HashMap<>();
+    @Autowired
+    private final FilmService filmService;
 
     @GetMapping
     public Collection get() {
-        log.info("provided list of films: " + films.values());
-        return films.values();
+        return filmService.getAllFilms();
+    }
+
+    @GetMapping("/{id}") //new
+    public Film getFilm(@PathVariable long id) {
+        return filmService.getFilm(id);
     }
 
     @PostMapping
     public Film add(@RequestBody Film newFilm) {
-        if (!validateName(newFilm)) {
-            log.error("provided wrong film name");
-            throw new ValidationException("Film should have a name");
-        }
-        if (!validateDescriptionLength(newFilm)) {
-            log.error("provided description is too long");
-            throw new ValidationException("Description length is more than 200 symbols");
-        }
-        if (newFilm.getReleaseDate().isBefore(cinematographyBirthdayDate)) {
-            log.error("provided wrong release date");
-            throw new ValidationException("Wrong release date");
-        }
-        if (newFilm.getDuration() < 0) {
-            log.error("provided duration is negative");
-            throw new ValidationException("Duration cannot be expressed with a negative number");
-        }
-
-        newFilm.setId(getNextId());
-
-        films.put(newFilm.getId(), newFilm);
-        log.info("added new film: {}", newFilm);
-
-        return newFilm;
+        return filmService.addFilm(newFilm);
     }
 
     @PutMapping
     public Film update(@RequestBody Film updatedFilm) {
-
-        if (updatedFilm.getId() == null) {
-            log.error("provided wrong ID");
-            throw new ValidationException("Id should be indicated");
-        }
-
-        if (films.containsKey(updatedFilm.getId())) {
-
-            if (!validateName(updatedFilm)) {
-                log.error("provided wrong film name");
-                throw new ValidationException("Film should have a name");
-            }
-            if (!validateDescriptionLength(updatedFilm)) {
-                log.error("provided description is too long");
-                throw new ValidationException("Description length is more than 200 symbols");
-            }
-            if (updatedFilm.getReleaseDate().isBefore(cinematographyBirthdayDate)) {
-                log.error("provided wrong release date");
-                throw new ValidationException("Wrong release date");
-            }
-            if (updatedFilm.getDuration() < 0) {
-                log.error("provided duration is negative");
-                throw new ValidationException("Duration cannot be expressed with a negative number");
-            }
-
-            Film oldFilm = films.get(updatedFilm.getId());
-
-            oldFilm.setName(updatedFilm.getName());
-            oldFilm.setDescription(updatedFilm.getDescription());
-            oldFilm.setDuration(updatedFilm.getDuration());
-            oldFilm.setReleaseDate(updatedFilm.getReleaseDate());
-            log.info("updated film: {}", oldFilm);
-
-            return oldFilm;
-
-        } else {
-            log.error("provided wrong ID");
-            throw new ValidationException("Indicated wrong id");
-        }
+        return filmService.updateFilm(updatedFilm);
     }
 
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/like/{userId}")
+    public void addLikeFromUser(@PathVariable long id, @PathVariable long userId) {
+        filmService.addLike(id, userId);
     }
 
-    private boolean validateDescriptionLength(Film film) {
-        return film.getDescription().length() <= 200;
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLikeFromUser(@PathVariable long id, @PathVariable long userId) {
+        filmService.deleteLike(id, userId);
     }
 
-    private boolean validateName(Film film) {
-        return StringUtils.hasText(film.getName());
+    @GetMapping("/popular")
+    public Set<Film> getMostPopularFilms(@RequestParam(required = false) String count) {
+        return filmService.getPopular(Optional.of(count));
+
     }
 }

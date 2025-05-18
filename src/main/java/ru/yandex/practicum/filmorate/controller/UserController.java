@@ -1,105 +1,58 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    private Map<Long, User> users = new HashMap<>();
+    @Autowired
+    private final UserService userService;
 
     @GetMapping
     public Collection get() {
-        log.info("provided list of users: " + users.values());
-        return users.values();
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}") //new
+    public User getUser(@PathVariable Long id) {
+        return userService.returnUserById(id);
     }
 
     @PostMapping
     public User add(@RequestBody User newUser) {
-        if (!emailValidation(newUser)) {
-            log.error("provided wrong email");
-            throw new ValidationException("Email should be indicated and have \"@\" symbol");
-        }
-        if (!loginValidation(newUser)) {
-            log.error("provided wrong login");
-            throw new ValidationException("Login cannot be blank or contain spaces");
-        }
-        if (!birthdayValidation(newUser)) {
-            log.error("provided wrong BD date");
-            throw new ValidationException("Birthday date is wrong");
-        }
-
-        newUser.setId(getNextId());
-        newUser.setName(StringUtils.hasText(newUser.getName()) ? newUser.getName() : newUser.getLogin());
-        users.put(newUser.getId(), newUser);
-        log.info("added new user: {}", newUser);
-
-        return newUser;
+        return userService.addUser(newUser);
     }
 
     @PutMapping
     public User update(@RequestBody User updatedUser) {
-        if (updatedUser.getId() == null) {
-            log.error("provided wrong ID");
-            throw new ValidationException("Id should be indicated");
-        }
-
-        if (users.containsKey(updatedUser.getId())) {
-            if (!emailValidation(updatedUser)) {
-                log.error("provided wrong email");
-                throw new ValidationException("Email should be indicated and have \"@\" symbol");
-            }
-            if (!loginValidation(updatedUser)) {
-                log.error("provided wrong login");
-                throw new ValidationException("Login cannot be blank or contain spaces");
-            }
-            if (!birthdayValidation(updatedUser)) {
-                log.error("provided wrong BD date");
-                throw new ValidationException("Birthday date is wrong");
-            }
-
-            User oldUser = users.get(updatedUser.getId());
-            oldUser.setName(updatedUser.getName() == null || updatedUser.getName().isEmpty()
-                    || updatedUser.getName().isBlank() ? updatedUser.getLogin() : updatedUser.getName());
-            oldUser.setEmail(updatedUser.getEmail());
-            oldUser.setLogin(updatedUser.getLogin());
-            oldUser.setBirthday(updatedUser.getBirthday());
-            log.info("updated user: {}", oldUser);
-
-            return oldUser;
-
-        } else {
-            log.error("provided wrong ID");
-            throw new ValidationException("Indicated wrong id");
-        }
+        return userService.updateUser(updatedUser);
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet().stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        System.out.println("-- запрошено добавление друзей " + id + " & " + friendId);
+        userService.addFriend(id, friendId);
     }
 
-    private boolean emailValidation(User user) {
-        return StringUtils.hasText(user.getEmail()) && user.getEmail().contains("@");
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
     }
 
-    private boolean loginValidation(User user) {
-        return StringUtils.hasText(user.getLogin()) && !user.getLogin().contains(" ");
+    @GetMapping("/{id}/friends")
+    public Collection<User> showFriends(@PathVariable Long id) {
+        return userService.returnFriends(id);
     }
 
-    private boolean birthdayValidation(User user) {
-        return user.getBirthday().isBefore(LocalDate.now());
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> showMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.mutualFriendsSet(id, otherId);
     }
 }
